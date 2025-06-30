@@ -1,8 +1,8 @@
 package cn.addenda.component.spring.cron;
 
 import cn.addenda.component.base.collection.ArrayUtils;
-import cn.addenda.component.base.sql.ConnectionUtils;
 import cn.addenda.component.base.string.Slf4jUtils;
+import cn.addenda.component.base.util.ConnectionUtils;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.InitializingBean;
@@ -167,7 +167,8 @@ public class CronBak extends CronClean implements InitializingBean {
         }
         connection.commit();
       } finally {
-        ConnectionUtils.setAutoCommitAndClose(connection, originalAutoCommit);
+        ConnectionUtils.setAutoCommit(connection, originalAutoCommit);
+        ConnectionUtils.close(connection);
       }
     }
   }

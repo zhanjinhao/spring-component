@@ -292,12 +292,12 @@ public class BeanUtils {
       String name = pd.getName();
       Object srcValue = src.getPropertyValue(name);
       if (ifNon) {
-        if (!(Boolean.TRUE.equals(predicate.test(new Binary<>(name, srcValue)))
+        if (!(Boolean.TRUE.equals(predicate.test(Binary.of(name, srcValue)))
                 || (propertiesSet != null && propertiesSet.contains(name)))) {
           emptyNames.add(name);
         }
       } else {
-        if (Boolean.TRUE.equals(predicate.test(new Binary<>(name, srcValue)))
+        if (Boolean.TRUE.equals(predicate.test(Binary.of(name, srcValue)))
                 || (propertiesSet != null && propertiesSet.contains(name))) {
           emptyNames.add(name);
         }

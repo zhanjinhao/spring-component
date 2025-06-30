@@ -35,7 +35,7 @@ public abstract class CronClean {
     LocalDateTime next1 = cronExpression.next(now);
     LocalDateTime next2 = Optional.ofNullable(next1).map(cronExpression::next).orElse(null);
     LocalDateTime next3 = Optional.ofNullable(next2).map(cronExpression::next).orElse(null);
-    return String.format("Cron表达式是[%s]。当前时间是[%s]。前三次执行时间是[%s]、[%s]、[%s]。",
+    return String.format("Cron表达式是[%s]。当前时间是[%s]。前三次执行时间是[%s、%s、%s]。",
             cron, DateUtils.format(now, DateUtils.yMdHmsS_FORMATTER),
             Optional.ofNullable(next1).map(s -> DateUtils.format(s, DateUtils.yMdHmsS_FORMATTER)).orElse("不执行"),
             Optional.ofNullable(next2).map(s -> DateUtils.format(s, DateUtils.yMdHmsS_FORMATTER)).orElse("不执行"),
