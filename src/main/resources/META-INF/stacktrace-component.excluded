@@ -1,3 +1,3 @@
-#cn.addenda.component.spring.argres.ArgResLogSupport
-#cn.addenda.component.spring.argres.ArgResLogMethodInterceptor
-#cn.addenda.component.spring.argres.ArgResLogUtils
+#cn.addenda.component.spring.aroundlog.AroundLogSupport
+#cn.addenda.component.spring.aroundlog.AroundLogMethodInterceptor
+#cn.addenda.component.spring.aroundlog.AroundLogUtils

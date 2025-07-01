@@ -1,4 +1,4 @@
-package cn.addenda.component.spring.test.argres.service;
+package cn.addenda.component.spring.test.aroundlog.service;
 
 import java.sql.SQLException;
 
@@ -6,7 +6,7 @@ import java.sql.SQLException;
  * @author addenda
  * @since 2023/4/17 21:42
  */
-public interface IArgResLogTestService {
+public interface IAroundLogTestService {
 
   String completeNormally(String param);
 

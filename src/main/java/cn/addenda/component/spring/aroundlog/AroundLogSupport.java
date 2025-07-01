@@ -1,4 +1,4 @@
-package cn.addenda.component.spring.argres;
+package cn.addenda.component.spring.aroundlog;
 
 import cn.addenda.component.base.datetime.DateUtils;
 import cn.addenda.component.base.exception.ExceptionUtils;
@@ -23,7 +23,7 @@ import java.util.stream.Collectors;
  */
 @Slf4j
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class ArgResLogSupport {
+public class AroundLogSupport {
 
   private static final String NULL_STR = "_NIL";
   private static final String ERROR_STR = "_ERROR";
@@ -32,7 +32,7 @@ public class ArgResLogSupport {
 
   private static final AtomicLong GLOBAL_SEQUENCE = new AtomicLong(0L);
 
-  private static final ThreadLocal<Deque<ArgResBo>> ARG_RES_DEQUE_TL = ThreadLocal.withInitial(ArrayDeque::new);
+  private static final ThreadLocal<Deque<AroundLogBo>> ARG_RES_DEQUE_TL = ThreadLocal.withInitial(ArrayDeque::new);
 
   protected static <R> R invoke(String callerInfo, TSupplier<R> supplier, Object[] arguments) throws Throwable {
     if (callerInfo == null) {
@@ -48,14 +48,14 @@ public class ArgResLogSupport {
     long globalSequence = GLOBAL_SEQUENCE.getAndIncrement();
     long sequence = SEQUENCE_GENERATOR_MAP.computeIfAbsent(callerInfo, s -> new AtomicLong(0L)).getAndIncrement();
 
-    ArgResBo cur = new ArgResBo();
-    Deque<ArgResBo> argResBoDeque = ARG_RES_DEQUE_TL.get();
-    if (argResBoDeque.isEmpty()) {
-      argResBoDeque.push(cur);
+    AroundLogBo cur = new AroundLogBo();
+    Deque<AroundLogBo> aroundLogBoDeque = ARG_RES_DEQUE_TL.get();
+    if (aroundLogBoDeque.isEmpty()) {
+      aroundLogBoDeque.push(cur);
     } else {
-      ArgResBo parent = argResBoDeque.peek();
+      AroundLogBo parent = aroundLogBoDeque.peek();
       parent.getChildren().add(cur);
-      argResBoDeque.push(cur);
+      aroundLogBoDeque.push(cur);
     }
 
     cur.setGlobalSequence(globalSequence);
@@ -79,8 +79,8 @@ public class ArgResLogSupport {
         cur.setCost(DateUtils.localDateTimeToTimestamp(cur.getEndDateTime()) - DateUtils.localDateTimeToTimestamp(cur.getStartDateTime()));
       }
     } finally {
-      ArgResBo pop = argResBoDeque.pop();
-      if (argResBoDeque.isEmpty()) {
+      AroundLogBo pop = aroundLogBoDeque.pop();
+      if (aroundLogBoDeque.isEmpty()) {
         if (pop.getError() != null) {
           log.error("{}", toJsonStr(pop), pop.getError());
         } else {
@@ -95,7 +95,7 @@ public class ArgResLogSupport {
   @Getter
   @ToString
   @NoArgsConstructor
-  public static class ArgResBo {
+  public static class AroundLogBo {
 
     private long globalSequence;
     private long callerSequence;
@@ -111,7 +111,7 @@ public class ArgResLogSupport {
     private Throwable error;
     private Long cost;
 
-    private List<ArgResBo> children = new ArrayList<>();
+    private List<AroundLogBo> children = new ArrayList<>();
 
   }
 
@@ -132,18 +132,18 @@ public class ArgResLogSupport {
       return NULL_STR;
     } else if (o instanceof Collection) {
       Collection<?> collection = (Collection<?>) o;
-      return collection.stream().map(ArgResLogSupport::toStr).collect(Collectors.joining(",", "[", "]"));
+      return collection.stream().map(AroundLogSupport::toStr).collect(Collectors.joining(",", "[", "]"));
     } else if (o.getClass().isArray()) {
       // A 是 B 的子类，则 A[] 是 B[] 的子类；
       // 所以 o 可以转换为 Object[]
       Object[] array = (Object[]) o;
-      return Arrays.stream(array).map(ArgResLogSupport::toStr).collect(Collectors.joining(",", "[", "]"));
+      return Arrays.stream(array).map(AroundLogSupport::toStr).collect(Collectors.joining(",", "[", "]"));
     } else if (o instanceof Map.Entry) {
       Map.Entry<?, ?> entry = (Map.Entry<?, ?>) o;
       return toStr(entry.getKey()) + "=" + toStr(entry.getValue());
     } else if (o instanceof Map) {
       Map<?, ?> map = (Map<?, ?>) o;
-      return "{" + map.entrySet().stream().map(ArgResLogSupport::toStr).collect(Collectors.joining(",")) + "}";
+      return "{" + map.entrySet().stream().map(AroundLogSupport::toStr).collect(Collectors.joining(",")) + "}";
     } else if (o instanceof Throwable) {
       Throwable throwable = (Throwable) o;
       StringWriter sw = new StringWriter();

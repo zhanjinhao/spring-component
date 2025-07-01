@@ -1,4 +1,4 @@
-package cn.addenda.component.spring.test.argres;
+package cn.addenda.component.spring.test.aroundlog;
 
 import java.util.function.Supplier;
 
@@ -6,7 +6,7 @@ import java.util.function.Supplier;
  * @author addenda
  * @since 2023/3/9 16:23
  */
-public class AbstractArgResLogTest {
+public class AbstractAroundLogTest {
 
   protected <R> R eatThrowable(Supplier<R> supplier) {
     try {

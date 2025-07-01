@@ -1,4 +1,4 @@
-package cn.addenda.component.spring.argres;
+package cn.addenda.component.spring.aroundlog;
 
 import org.springframework.aop.Pointcut;
 import org.springframework.aop.support.AbstractBeanFactoryPointcutAdvisor;
@@ -12,21 +12,21 @@ import java.lang.reflect.Method;
  * @author addenda
  * @since 2022/9/29 13:52
  */
-public class ArgResLogAdvisor extends AbstractBeanFactoryPointcutAdvisor {
+public class AroundLogAdvisor extends AbstractBeanFactoryPointcutAdvisor {
 
   @Override
   public Pointcut getPointcut() {
-    return new ArgResLogPointcut();
+    return new AroundLogPointcut();
   }
 
-  public static class ArgResLogPointcut extends StaticMethodMatcherPointcut {
+  public static class AroundLogPointcut extends StaticMethodMatcherPointcut {
 
     @Override
     public boolean matches(Method method, Class<?> targetClass) {
-      ArgResLog annotation = AnnotationUtils.findAnnotation(targetClass, ArgResLog.class);
+      AroundLog annotation = AnnotationUtils.findAnnotation(targetClass, AroundLog.class);
       if (annotation == null) {
         Method actualMethod = AopUtils.getMostSpecificMethod(method, targetClass);
-        annotation = AnnotationUtils.findAnnotation(actualMethod, ArgResLog.class);
+        annotation = AnnotationUtils.findAnnotation(actualMethod, AroundLog.class);
       }
 
       return annotation != null;

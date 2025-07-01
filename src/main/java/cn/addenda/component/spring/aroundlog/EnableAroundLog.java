@@ -1,4 +1,4 @@
-package cn.addenda.component.spring.argres;
+package cn.addenda.component.spring.aroundlog;
 
 import org.springframework.context.annotation.AdviceMode;
 import org.springframework.context.annotation.Import;
@@ -13,8 +13,8 @@ import java.lang.annotation.*;
 @Target(ElementType.TYPE)
 @Retention(RetentionPolicy.RUNTIME)
 @Documented
-@Import(ArgResLogSelector.class)
-public @interface EnableArgResLog {
+@Import(AroundLogSelector.class)
+public @interface EnableAroundLog {
 
   int order() default Ordered.LOWEST_PRECEDENCE;
 

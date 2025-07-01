@@ -1,10 +1,10 @@
-package cn.addenda.component.spring.test.argres;
+package cn.addenda.component.spring.test.aroundlog;
 
-import cn.addenda.component.spring.argres.ArgResLogUtils;
-import cn.addenda.component.spring.test.argres.service.ArgResLogTestAopService;
-import cn.addenda.component.spring.test.argres.service.ArgResLogTestAopThenUtilsService;
-import cn.addenda.component.spring.test.argres.service.ArgResLogTestUtilsService;
-import cn.addenda.component.spring.test.argres.service.IArgResLogTestService;
+import cn.addenda.component.spring.aroundlog.AroundLogUtils;
+import cn.addenda.component.spring.test.aroundlog.service.AroundLogTestAopService;
+import cn.addenda.component.spring.test.aroundlog.service.AroundLogTestAopThenUtilsService;
+import cn.addenda.component.spring.test.aroundlog.service.AroundLogTestUtilsService;
+import cn.addenda.component.spring.test.aroundlog.service.IAroundLogTestService;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.After;
 import org.junit.Before;
@@ -19,24 +19,24 @@ import java.sql.SQLException;
  * @since 2023/3/9 14:45
  */
 @Slf4j
-public class ArgResLogTest extends AbstractArgResLogTest {
+public class AroundLogTest extends AbstractAroundLogTest {
 
   AnnotationConfigApplicationContext context;
 
-  IArgResLogTestService argResLogTestAopService;
-  IArgResLogTestService argResLogTestAopThenUtilsService;
-  IArgResLogTestService argResLogTestUtilsService = new ArgResLogTestUtilsService();
+  IAroundLogTestService aroundLogTestAopService;
+  IAroundLogTestService aroundLogTestAopThenUtilsService;
+  IAroundLogTestService aroundLogTestUtilsService = new AroundLogTestUtilsService();
 
   @Before
   public void before() {
     context = new AnnotationConfigApplicationContext();
-    context.register(ArgResLogTestConfiguration.class);
-    context.register(ArgResLogTestAopThenUtilsService.class);
-    context.register(ArgResLogTestAopService.class);
+    context.register(AroundLogTestConfiguration.class);
+    context.register(AroundLogTestAopThenUtilsService.class);
+    context.register(AroundLogTestAopService.class);
     context.refresh();
 
-    argResLogTestAopThenUtilsService = context.getBean("argResLogTestAopThenUtilsService", IArgResLogTestService.class);
-    argResLogTestAopService = context.getBean("argResLogTestAopService", IArgResLogTestService.class);
+    aroundLogTestAopThenUtilsService = context.getBean("aroundLogTestAopThenUtilsService", IAroundLogTestService.class);
+    aroundLogTestAopService = context.getBean("aroundLogTestAopService", IAroundLogTestService.class);
   }
 
   @After
@@ -48,13 +48,13 @@ public class ArgResLogTest extends AbstractArgResLogTest {
   public void testAop() {
     System.setProperty(DebuggingClassWriter.DEBUG_LOCATION_PROPERTY, "D:\\workspace\\2022");
 
-    Object o0 = eatThrowable(() -> argResLogTestAopService.completeNormally("AA"));
+    Object o0 = eatThrowable(() -> aroundLogTestAopService.completeNormally("AA"));
     System.out.print("\n------------------------------------------------------------------------------------------\n");
-    Object o2 = eatThrowable(() -> argResLogTestAopService.completeBusinessExceptionally("AA"));
+    Object o2 = eatThrowable(() -> aroundLogTestAopService.completeBusinessExceptionally("AA"));
     System.out.print("\n------------------------------------------------------------------------------------------\n");
     Object o3 = eatThrowable(() -> {
       try {
-        return argResLogTestAopService.completeCheckedExceptionally("AA");
+        return aroundLogTestAopService.completeCheckedExceptionally("AA");
       } catch (SQLException e) {
         return null;
       }
@@ -65,13 +65,13 @@ public class ArgResLogTest extends AbstractArgResLogTest {
   public void testUtils() {
     System.setProperty(DebuggingClassWriter.DEBUG_LOCATION_PROPERTY, "D:\\workspace\\2022");
 
-    Object o0 = eatThrowable(() -> argResLogTestUtilsService.completeNormally("AA"));
+    Object o0 = eatThrowable(() -> aroundLogTestUtilsService.completeNormally("AA"));
     System.out.print("\n------------------------------------------------------------------------------------------\n");
-    Object o2 = eatThrowable(() -> argResLogTestUtilsService.completeBusinessExceptionally("AA"));
+    Object o2 = eatThrowable(() -> aroundLogTestUtilsService.completeBusinessExceptionally("AA"));
     System.out.print("\n------------------------------------------------------------------------------------------\n");
     Object o3 = eatThrowable(() -> {
       try {
-        return argResLogTestUtilsService.completeCheckedExceptionally("AA");
+        return aroundLogTestUtilsService.completeCheckedExceptionally("AA");
       } catch (SQLException e) {
         return null;
       }
@@ -81,16 +81,16 @@ public class ArgResLogTest extends AbstractArgResLogTest {
   @Test
   public void testAopThenUtils() {
     Object o1 = eatThrowable(() -> {
-      return argResLogTestAopThenUtilsService.completeNormally("AA");
+      return aroundLogTestAopThenUtilsService.completeNormally("AA");
     });
     System.out.print("\n------------------------------------------------------------------------------------------\n");
     Object o2 = eatThrowable(() -> {
-      return argResLogTestAopThenUtilsService.completeBusinessExceptionally("AA");
+      return aroundLogTestAopThenUtilsService.completeBusinessExceptionally("AA");
     });
     System.out.print("\n------------------------------------------------------------------------------------------\n");
     Object o3 = eatThrowable(() -> {
       try {
-        return argResLogTestAopThenUtilsService.completeCheckedExceptionally("AA");
+        return aroundLogTestAopThenUtilsService.completeCheckedExceptionally("AA");
       } catch (SQLException e) {
         return null;
       }
@@ -101,25 +101,25 @@ public class ArgResLogTest extends AbstractArgResLogTest {
   public void testUtilsThenAop() {
     Object o1 = eatThrowable(() -> {
 
-      return ArgResLogUtils.doLog(() -> {
-        argResLogTestAopService.completeNormally("AA1");
-        return argResLogTestAopService.completeNormally("AA2");
+      return AroundLogUtils.doLog(() -> {
+        aroundLogTestAopService.completeNormally("AA1");
+        return aroundLogTestAopService.completeNormally("AA2");
       }, "AA3");
     });
     System.out.print("\n------------------------------------------------------------------------------------------\n");
 
     Object o2 = eatThrowable(() -> {
-      return ArgResLogUtils.doLog(() -> {
-        argResLogTestAopService.completeBusinessExceptionally("AA4");
-        return argResLogTestAopService.completeBusinessExceptionally("AA5");
+      return AroundLogUtils.doLog(() -> {
+        aroundLogTestAopService.completeBusinessExceptionally("AA4");
+        return aroundLogTestAopService.completeBusinessExceptionally("AA5");
       }, "AA6");
     });
     System.out.print("\n------------------------------------------------------------------------------------------\n");
 
     Object o3 = eatThrowable(() -> {
-      return ArgResLogUtils.doLog(() -> {
-        argResLogTestAopService.completeCheckedExceptionally("AA7");
-        return argResLogTestAopService.completeCheckedExceptionally("AA8");
+      return AroundLogUtils.doLog(() -> {
+        aroundLogTestAopService.completeCheckedExceptionally("AA7");
+        return aroundLogTestAopService.completeCheckedExceptionally("AA8");
       }, "AA9");
     });
   }

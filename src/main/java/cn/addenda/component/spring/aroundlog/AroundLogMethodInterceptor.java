@@ -1,4 +1,4 @@
-package cn.addenda.component.spring.argres;
+package cn.addenda.component.spring.aroundlog;
 
 import cn.addenda.component.base.exception.ExceptionUtils;
 import lombok.extern.slf4j.Slf4j;
@@ -14,13 +14,13 @@ import java.lang.reflect.Method;
  * @since 2022/9/29 13:51
  */
 @Slf4j
-public class ArgResLogMethodInterceptor extends ArgResLogSupport implements MethodInterceptor {
+public class AroundLogMethodInterceptor extends AroundLogSupport implements MethodInterceptor {
 
   @Override
   public Object invoke(MethodInvocation invocation) throws Throwable {
     Method method = AopUtils.getMostSpecificMethod(invocation.getMethod(), invocation.getThis().getClass());
-    ArgResLog argResLog = AnnotationUtils.findAnnotation(method, ArgResLog.class);
-    if (argResLog == null) {
+    AroundLog aroundLog = AnnotationUtils.findAnnotation(method, AroundLog.class);
+    if (aroundLog == null) {
       return invocation.proceed();
     }
 

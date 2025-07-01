@@ -1,4 +1,4 @@
-package cn.addenda.component.spring.argres;
+package cn.addenda.component.spring.aroundlog;
 
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.context.annotation.Bean;
@@ -11,29 +11,29 @@ import org.springframework.core.type.AnnotationMetadata;
  * @author addenda
  * @since 2022/9/29 13:51
  */
-public class ArgResLogConfiguration implements ImportAware {
+public class AroundLogConfiguration implements ImportAware {
 
   protected AnnotationAttributes annotationAttributes;
 
   @Override
   public void setImportMetadata(AnnotationMetadata importMetadata) {
     this.annotationAttributes = AnnotationAttributes.fromMap(
-            importMetadata.getAnnotationAttributes(EnableArgResLog.class.getName(), false));
+            importMetadata.getAnnotationAttributes(EnableAroundLog.class.getName(), false));
     if (this.annotationAttributes == null) {
       throw new IllegalArgumentException(
-              EnableArgResLog.class.getName() + " is not present on importing class " + importMetadata.getClassName());
+              EnableAroundLog.class.getName() + " is not present on importing class " + importMetadata.getClassName());
     }
   }
 
   @Bean
   @Role(BeanDefinition.ROLE_INFRASTRUCTURE)
-  public ArgResLogAdvisor argResLogAdvisor() {
-    ArgResLogAdvisor argResLogAdvisor = new ArgResLogAdvisor();
-    argResLogAdvisor.setAdvice(new ArgResLogMethodInterceptor());
+  public AroundLogAdvisor aroundLogAdvisor() {
+    AroundLogAdvisor aroundLogAdvisor = new AroundLogAdvisor();
+    aroundLogAdvisor.setAdvice(new AroundLogMethodInterceptor());
     if (this.annotationAttributes != null) {
-      argResLogAdvisor.setOrder(annotationAttributes.<Integer>getNumber("order"));
+      aroundLogAdvisor.setOrder(annotationAttributes.<Integer>getNumber("order"));
     }
-    return argResLogAdvisor;
+    return aroundLogAdvisor;
   }
 
 }
