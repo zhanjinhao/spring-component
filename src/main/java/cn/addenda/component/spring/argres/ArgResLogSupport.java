@@ -1,5 +1,6 @@
 package cn.addenda.component.spring.argres;
 
+import cn.addenda.component.base.datetime.DateUtils;
 import cn.addenda.component.base.exception.ExceptionUtils;
 import cn.addenda.component.base.jackson.util.JacksonUtils;
 import cn.addenda.component.base.lambda.TSupplier;
@@ -10,7 +11,7 @@ import lombok.extern.slf4j.Slf4j;
 
 import java.io.PrintWriter;
 import java.io.StringWriter;
-import java.lang.reflect.UndeclaredThrowableException;
+import java.time.LocalDateTime;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicLong;
@@ -60,10 +61,9 @@ public class ArgResLogSupport {
     cur.setGlobalSequence(globalSequence);
     cur.setCallerSequence(sequence);
     cur.setCaller(callerInfo);
+    cur.setStartDateTime(LocalDateTime.now());
     cur.setArgument(arguments == null || arguments.length == 0 ?
             "No arguments." : arguments);
-
-    long start = System.currentTimeMillis();
 
     try {
       try {
@@ -75,7 +75,8 @@ public class ArgResLogSupport {
         cur.setError(ExceptionUtils.unwrapThrowable(throwable));
         throw throwable;
       } finally {
-        cur.setCost(System.currentTimeMillis() - start);
+        cur.setEndDateTime(LocalDateTime.now());
+        cur.setCost(DateUtils.localDateTimeToTimestamp(cur.getEndDateTime()) - DateUtils.localDateTimeToTimestamp(cur.getStartDateTime()));
       }
     } finally {
       ArgResBo pop = argResBoDeque.pop();
@@ -100,6 +101,9 @@ public class ArgResLogSupport {
     private long callerSequence;
     private String caller;
 
+    private LocalDateTime startDateTime;
+    private LocalDateTime endDateTime;
+
     private Object argument;
     private Object result;
 
@@ -114,19 +118,6 @@ public class ArgResLogSupport {
   private static String toJsonStr(Object o) {
     if (o == null) {
       return NULL_STR;
-    }
-    if (o instanceof String) {
-      return (String) o;
-    }
-
-    if (o instanceof Throwable) {
-      Throwable throwable = (Throwable) o;
-      if (throwable instanceof UndeclaredThrowableException) {
-        throwable = throwable.getCause();
-      }
-      StringWriter sw = new StringWriter();
-      throwable.printStackTrace(new PrintWriter(sw));
-      return sw.toString();
     }
 
     return JacksonUtils.toStr(o);

@@ -3,11 +3,14 @@ package cn.addenda.component.spring.argres;
 import cn.addenda.component.base.exception.ExceptionUtils;
 import cn.addenda.component.base.lambda.TRunnable;
 import cn.addenda.component.base.lambda.TSupplier;
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
 
 /**
  * @author addenda
  * @since 2023/3/9 11:17
  */
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class ArgResLogUtils extends ArgResLogSupport {
 
   public static void doLog(TRunnable runnable, Object... arguments) {
