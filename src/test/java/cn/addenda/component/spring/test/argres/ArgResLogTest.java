@@ -56,7 +56,6 @@ public class ArgResLogTest extends AbstractArgResLogTest {
       try {
         return argResLogTestAopService.completeCheckedExceptionally("AA");
       } catch (SQLException e) {
-        e.printStackTrace();
         return null;
       }
     });
@@ -74,7 +73,6 @@ public class ArgResLogTest extends AbstractArgResLogTest {
       try {
         return argResLogTestUtilsService.completeCheckedExceptionally("AA");
       } catch (SQLException e) {
-        e.printStackTrace();
         return null;
       }
     });
@@ -94,7 +92,6 @@ public class ArgResLogTest extends AbstractArgResLogTest {
       try {
         return argResLogTestAopThenUtilsService.completeCheckedExceptionally("AA");
       } catch (SQLException e) {
-        e.printStackTrace();
         return null;
       }
     });
@@ -103,23 +100,27 @@ public class ArgResLogTest extends AbstractArgResLogTest {
   @Test
   public void testUtilsThenAop() {
     Object o1 = eatThrowable(() -> {
+
       return ArgResLogUtils.doLog(() -> {
-        return argResLogTestAopService.completeNormally("AA");
-      }, "AA");
+        argResLogTestAopService.completeNormally("AA1");
+        return argResLogTestAopService.completeNormally("AA2");
+      }, "AA3");
     });
     System.out.print("\n------------------------------------------------------------------------------------------\n");
 
     Object o2 = eatThrowable(() -> {
       return ArgResLogUtils.doLog(() -> {
-        return argResLogTestAopService.completeBusinessExceptionally("AA");
-      }, "AA");
+        argResLogTestAopService.completeBusinessExceptionally("AA4");
+        return argResLogTestAopService.completeBusinessExceptionally("AA5");
+      }, "AA6");
     });
     System.out.print("\n------------------------------------------------------------------------------------------\n");
 
     Object o3 = eatThrowable(() -> {
       return ArgResLogUtils.doLog(() -> {
-        return argResLogTestAopService.completeCheckedExceptionally("AA");
-      }, "AA");
+        argResLogTestAopService.completeCheckedExceptionally("AA7");
+        return argResLogTestAopService.completeCheckedExceptionally("AA8");
+      }, "AA9");
     });
   }
 

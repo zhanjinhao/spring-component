@@ -28,7 +28,7 @@ public class ArgResLogUtils extends ArgResLogSupport {
 
   public static <R> R doLog(String callerInfo, TSupplier<R> supplier, Object... arguments) {
     try {
-      return invoke(arguments, supplier, callerInfo);
+      return invoke(callerInfo, supplier, arguments);
     }
     // invoke在两种情况下会发生异常：
     // 第一种情况：executor内部的异常，此时原始异常会被包装成ArgResLogException。

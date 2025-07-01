@@ -1,8 +1,10 @@
 package cn.addenda.component.spring.argres;
 
+import cn.addenda.component.base.exception.ExceptionUtils;
 import cn.addenda.component.base.jackson.util.JacksonUtils;
 import cn.addenda.component.base.lambda.TSupplier;
 import cn.addenda.component.stacktrace.StackTraceUtils;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.*;
 import lombok.extern.slf4j.Slf4j;
 
@@ -22,7 +24,8 @@ import java.util.stream.Collectors;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class ArgResLogSupport {
 
-  private static final String NULL_STR = "NIL";
+  private static final String NULL_STR = "_NIL";
+  private static final String ERROR_STR = "_ERROR";
 
   private static final Map<String, AtomicLong> SEQUENCE_GENERATOR_MAP = new ConcurrentHashMap<>();
 
@@ -30,17 +33,17 @@ public class ArgResLogSupport {
 
   private static final ThreadLocal<Deque<ArgResBo>> ARG_RES_DEQUE_TL = ThreadLocal.withInitial(ArrayDeque::new);
 
-  protected static <R> R invoke(Object[] arguments, TSupplier<R> supplier, String callerInfo) throws Throwable {
+  protected static <R> R invoke(String callerInfo, TSupplier<R> supplier, Object[] arguments) throws Throwable {
     if (callerInfo == null) {
-      callerInfo = StackTraceUtils.getCallerInfo(true, true, true);
+      callerInfo = StackTraceUtils.getDetailedCallerInfo(true, false, false);
     }
-    return doInvoke(arguments, supplier, callerInfo);
+    return doInvoke(callerInfo, supplier, arguments);
   }
 
   /**
    * @param supplier 这里必须要使用TSupplier，因为
    */
-  private static <R> R doInvoke(Object[] arguments, TSupplier<R> supplier, String callerInfo) throws Throwable {
+  private static <R> R doInvoke(String callerInfo, TSupplier<R> supplier, Object[] arguments) throws Throwable {
     long globalSequence = GLOBAL_SEQUENCE.getAndIncrement();
     long sequence = SEQUENCE_GENERATOR_MAP.computeIfAbsent(callerInfo, s -> new AtomicLong(0L)).getAndIncrement();
 
@@ -54,20 +57,22 @@ public class ArgResLogSupport {
       argResBoDeque.push(cur);
     }
 
-    cur.setCallerInfo(callerInfo);
-    cur.setSequence(globalSequence + "-" + sequence);
+    cur.setGlobalSequence(globalSequence);
+    cur.setCallerSequence(sequence);
+    cur.setCaller(callerInfo);
     cur.setArgument(arguments == null || arguments.length == 0 ?
-            "No arguments." : toJsonStr(arguments));
+            "No arguments." : arguments);
 
     long start = System.currentTimeMillis();
 
     try {
       try {
         R result = supplier.get();
-        cur.setResult(toJsonStr(result));
+        cur.setResult(result);
         return result;
       } catch (Throwable throwable) {
-        cur.setError(toJsonStr(throwable));
+        cur.setResult(ERROR_STR);
+        cur.setError(ExceptionUtils.unwrapThrowable(throwable));
         throw throwable;
       } finally {
         cur.setCost(System.currentTimeMillis() - start);
@@ -75,7 +80,11 @@ public class ArgResLogSupport {
     } finally {
       ArgResBo pop = argResBoDeque.pop();
       if (argResBoDeque.isEmpty()) {
-        log.info(toJsonStr(pop));
+        if (pop.getError() != null) {
+          log.error("{}", toJsonStr(pop), pop.getError());
+        } else {
+          log.info("{}", toJsonStr(pop));
+        }
         ARG_RES_DEQUE_TL.remove();
       }
     }
@@ -87,12 +96,15 @@ public class ArgResLogSupport {
   @NoArgsConstructor
   public static class ArgResBo {
 
-    private String sequence;
-    private String callerInfo;
+    private long globalSequence;
+    private long callerSequence;
+    private String caller;
 
-    private String argument;
-    private String result;
-    private String error;
+    private Object argument;
+    private Object result;
+
+    @JsonIgnore
+    private Throwable error;
     private Long cost;
 
     private List<ArgResBo> children = new ArrayList<>();
@@ -102,6 +114,9 @@ public class ArgResLogSupport {
   private static String toJsonStr(Object o) {
     if (o == null) {
       return NULL_STR;
+    }
+    if (o instanceof String) {
+      return (String) o;
     }
 
     if (o instanceof Throwable) {

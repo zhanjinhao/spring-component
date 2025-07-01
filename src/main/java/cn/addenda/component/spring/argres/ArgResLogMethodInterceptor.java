@@ -29,7 +29,7 @@ public class ArgResLogMethodInterceptor extends ArgResLogSupport implements Meth
     String callerInfo = method.getDeclaringClass().getSimpleName() + "#" + method.getName();
 
     try {
-      return invoke(invocation.getArguments(), invocation::proceed, callerInfo);
+      return invoke(callerInfo, invocation::proceed, invocation.getArguments());
     } catch (Throwable throwable) {
       throw ExceptionUtils.unwrapThrowable(throwable);
     }
