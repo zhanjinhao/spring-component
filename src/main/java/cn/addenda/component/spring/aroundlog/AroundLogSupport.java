@@ -28,9 +28,9 @@ public class AroundLogSupport {
   private static final String NULL_STR = "_NIL";
   private static final String ERROR_STR = "_ERROR";
 
-  private static final Map<String, AtomicLong> SEQUENCE_GENERATOR_MAP = new ConcurrentHashMap<>();
+  private static final Map<String, AtomicLong> SEQ_GENERATOR_MAP = new ConcurrentHashMap<>();
 
-  private static final AtomicLong GLOBAL_SEQUENCE = new AtomicLong(0L);
+  private static final AtomicLong GLOBAL_SEQ = new AtomicLong(0L);
 
   private static final ThreadLocal<Deque<AroundLogBo>> ARG_RES_DEQUE_TL = ThreadLocal.withInitial(ArrayDeque::new);
 
@@ -45,8 +45,8 @@ public class AroundLogSupport {
    * @param supplier 这里必须要使用TSupplier，因为
    */
   private static <R> R doInvoke(String callerInfo, TSupplier<R> supplier, Object[] arguments) throws Throwable {
-    long globalSequence = GLOBAL_SEQUENCE.getAndIncrement();
-    long sequence = SEQUENCE_GENERATOR_MAP.computeIfAbsent(callerInfo, s -> new AtomicLong(0L)).getAndIncrement();
+    long globalSeq = GLOBAL_SEQ.getAndIncrement();
+    long callerSeq = SEQ_GENERATOR_MAP.computeIfAbsent(callerInfo, s -> new AtomicLong(0L)).getAndIncrement();
 
     AroundLogBo cur = new AroundLogBo();
     Deque<AroundLogBo> aroundLogBoDeque = ARG_RES_DEQUE_TL.get();
@@ -58,10 +58,10 @@ public class AroundLogSupport {
       aroundLogBoDeque.push(cur);
     }
 
-    cur.setGlobalSequence(globalSequence);
-    cur.setCallerSequence(sequence);
+    cur.setGlobalSeq(globalSeq);
+    cur.setCallerSeq(callerSeq);
     cur.setCaller(callerInfo);
-    cur.setStartDateTime(LocalDateTime.now());
+    cur.setStartDt(LocalDateTime.now());
     cur.setArgument(arguments == null || arguments.length == 0 ?
             "No arguments." : arguments);
 
@@ -75,8 +75,8 @@ public class AroundLogSupport {
         cur.setError(ExceptionUtils.unwrapThrowable(throwable));
         throw throwable;
       } finally {
-        cur.setEndDateTime(LocalDateTime.now());
-        cur.setCost(DateUtils.localDateTimeToTimestamp(cur.getEndDateTime()) - DateUtils.localDateTimeToTimestamp(cur.getStartDateTime()));
+        cur.setEndDt(LocalDateTime.now());
+        cur.setCost(DateUtils.localDateTimeToTimestamp(cur.getEndDt()) - DateUtils.localDateTimeToTimestamp(cur.getStartDt()));
       }
     } finally {
       AroundLogBo pop = aroundLogBoDeque.pop();
@@ -97,12 +97,12 @@ public class AroundLogSupport {
   @NoArgsConstructor
   public static class AroundLogBo {
 
-    private long globalSequence;
-    private long callerSequence;
+    private long globalSeq;
+    private long callerSeq;
     private String caller;
 
-    private LocalDateTime startDateTime;
-    private LocalDateTime endDateTime;
+    private LocalDateTime startDt;
+    private LocalDateTime endDt;
 
     private Object argument;
     private Object result;
