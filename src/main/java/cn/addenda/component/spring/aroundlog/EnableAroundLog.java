@@ -7,6 +7,9 @@ import org.springframework.core.Ordered;
 import java.lang.annotation.*;
 
 /**
+ *
+ * todo 日志中心抽象出来，支持存库
+ *
  * @author addenda
  * @since 2022/9/29 13:55
  */
